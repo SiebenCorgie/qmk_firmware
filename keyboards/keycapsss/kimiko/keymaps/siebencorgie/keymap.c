@@ -2,7 +2,7 @@
  * Copyright 2020 Drashna Jaelre <@drashna>
  * Copyright 2020 @ben_roe (keycapsss.com)
  * Copyright 2022 Tendsin Mende <@siebencorgie>
- * *
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -16,6 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/* NEO MODIFICATION
+ *
+ * This mod erases the custom lower/raise layers in favor or software handled layers. The Neo layout needs only minor modifications to
+ * use the keyboard.
+ *
+ * QWERTY -> NEO mapping
+ *
+ * L1: is the base layer
+ * L2: via LSHIFT
+ * L3: MOD3: LCAPS
+ * L4: MOD4: "\"-key on qwerty
+ * L5: R-ALT
+*/
+
+/*TODO: - reimplement GUI
+        - combination based shift into other layer for functions (music control and stuff like that)
+*/
 
 //uncomment for a debug messages. Note that you have to enable the CONSOLE_ENABLE flag in rules.mk as well.
 //#define MYDEBUG 1
@@ -40,24 +58,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* QWERTY
  * ,--------------------------------------------.                    ,----------------------------------------------.
- * |   ESC   |   1  |   2  |   3  |   4  |   5  |                    |   6  |   7  |   8  |   9  |   0  |  `        |
+ * |   ESC   |   1  |   2  |   3  |   4  |   5  |                    |   6  |   7  |   8  |   9  |   0  |   -       |
  * |---------+------+------+------+------+------|                    |------+------+------+------+------+-----------|
- * |   Tab   |   Q  |   W  |   E  |   R  |   T  |                    |   Y  |   U  |   I  |   O  |   P  |  -        |
+ * |   Tab   |   Q  |   W  |   E  |   R  |   T  |                    |   Y  |   U  |   I  |   O  |   P  |   [       |
  * |---------+------+------+------+------+------|                    |------+------+------+------+------+-----------|
  * |  LShift |   A  |   S  |   D  |   F  |   G  |-------.    ,-------|   H  |   J  |   K  |   L  |   ;  |  '        |
- * |---------+------+------+------+------+------|   [   |    |    ]  |------+------+------+------+------+-----------|
+ * |---------+------+------+------+------+------|   `   |    |    ]  |------+------+------+------+------+-----------|
  * |  LCTRL  |   Z  |   X  |   C  |   V  |   B  |-------|    |-------|   N  |   M  |   ,  |   .  |   /  |RShift/Enter|
  * `-------------------------------------------|       /     \      \-----------------------------------------------'
- *                 | LCTRL| LGUI | LALT |LOWER| Space /       \Enter \  |RAISE |BackSP| RGUI | RALT |
+ *                 | LCTRL| LGUI | LALT | CAPS | Space /       \Enter \ | BCKSLASH |BackSP| RGUI | RALT |
  *                 `----------------------------------'       '------------------------------------'
  */
 
  [_QWERTY] = LAYOUT(
-    KC_ESC,   KC_1,   KC_2,    KC_3,    KC_4,    KC_5,                        KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_GRV,
-    KC_TAB,   KC_Q,   KC_W,    KC_E,    KC_R,    KC_T,                        KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_MINS,
-    KC_LSFT, KC_A,   KC_S,    KC_D,    KC_F,    KC_G,                        KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
-    KC_LCTRL, KC_Z,   KC_X,    KC_C,    KC_V,    KC_B,    KC_LBRC,  KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, RSFT_T(KC_ENT),
-                      KC_LCTL, KC_LGUI, KC_LALT, LOWER,   KC_SPC,   KC_ENT,   RAISE,   KC_BSPC, KC_RGUI, KC_RALT
+    KC_ESC,   KC_1,   KC_2,    KC_3,    KC_4,    KC_5,                        KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS,
+    KC_TAB,   KC_Q,   KC_W,    KC_E,    KC_R,    KC_T,                        KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,
+    KC_LSFT,  KC_A,   KC_S,    KC_D,    KC_F,    KC_G,                        KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
+    KC_LCTRL, KC_Z,   KC_X,    KC_C,    KC_V,    KC_B,    KC_GRV,   KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, RSFT_T(KC_ENT),
+                      KC_LCTL, KC_LGUI, KC_LALT, KC_CAPS, KC_SPC,   KC_ENT,   KC_RALT,   KC_BSPC, KC_RGUI, KC_RALT
 ),
 /* LOWER
  * ,-------------------------------------------.                    ,-----------------------------------------.
@@ -123,12 +141,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                       _______, _______, _______, _______, _______, _______,  _______, _______, _______, _______
   )
 };
-
-
-layer_state_t layer_state_set_user(layer_state_t state) {
-    state = update_tri_layer_state(state, _RAISE, _LOWER, _ADJUST);
-    return state;
-}
 
 #ifdef MYDEBUG
 void keyboard_post_init_user(void) {
@@ -366,9 +378,9 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
             case _QWERTY:
                 // Arrow Up/Down
                 if (clockwise) {
-                    tap_code(KC_DOWN);
+                    tap_code(KC_WH_U);
                 } else {
-                    tap_code(KC_UP);
+                    tap_code(KC_WH_D);
                 }
                 break;
 
@@ -398,7 +410,7 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
     else if (index == 1) {
         switch (get_highest_layer(layer_state)) {
             // If the Default (QWERTY) layer is active
-            case _QWERTY:
+            case _LOWER:
                 // Scroll by Word
                 if (clockwise) {
                     tap_code16(LCTL(KC_RGHT));
@@ -408,7 +420,7 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
                 break;
 
             // If the LOWER layer is active
-            case _LOWER:
+            case _QWERTY:
                 // Volume up/down
                 if (clockwise) {
                     tap_code(KC_VOLU);
